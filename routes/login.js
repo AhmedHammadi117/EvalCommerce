@@ -22,14 +22,13 @@ router.post('/', async (req, res) => {
 
     const payload = { id: user.id, username: user.username, role: user.role };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '1h' });
-    const data = { message: 'Connexion réussie', token, user: { id: user.id, username: user.username, role: user.role } };
-    //console.log("🟢 Réponse serveur :", data);
-    console.log("👤 Utilisateur :", data.user.username, "| Rôle :", data.user.role);
+    const response = { ok: true, message: 'Connexion réussie', token, user: { id: user.id, username: user.username, role: user.role } };
+    console.log("👤 Utilisateur :", response.user.username, "| Rôle :", response.user.role);
 
-    res.json({message: 'Connexion réussie', token, user: { id: user.id, username: user.username, role: user.role } });
+    res.json(response);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Erreur serveur' });
+    res.status(500).json({ ok: false, message: 'Erreur serveur' });
   }
   
 

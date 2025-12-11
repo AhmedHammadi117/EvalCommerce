@@ -1,51 +1,102 @@
 // controllers/messageController.js
+/**
+ * Contrôleur pour gérer les opérations de messages
+ * Responsable de valider les entrées et orchestrer les appels au service
+ */
 const messageService = require('../services/messageService');
+const { validateTitre, validateContenu, validateSquad, validateUserId } = require('../middleware/validation');
+const logger = require('../config/logger');
 
-// Gestionnaire envoie un message
+/**
+ * POST /api/message/send
+ * Envoie un message à un utilisateur ou une squad
+ * Authentification: Manager requis
+ */
 const envoyerMessageController = async (req, res) => {
   try {
     const { idDestinataire, titre, contenu, squad } = req.body;
     const idExpediteur = req.user.id;
-    console.log('envoyermessageController called by user:', idExpediteur, 'body:', req.body);
+    logger.info(`envoyerMessage appelé par user: ${idExpediteur} | destinataire: ${idDestinataire || 'N/A'} | squad: ${squad || 'N/A'}`);
 
+    // Validation : au moins un destinataire OU une squad est requis
     if (!idDestinataire && !squad) {
       return res.status(400).json({ ok: false, message: 'Id destinataire ou squad requis' });
     }
 
+    // Validation du titre et du contenu
+    const titleValidation = validateTitre(titre);
+    if (!titleValidation.valid) {
+      return res.status(400).json({ ok: false, message: titleValidation.error });
+    }
+    const contentValidation = validateContenu(contenu);
+    if (!contentValidation.valid) {
+      return res.status(400).json({ ok: false, message: contentValidation.error });
+    }
+
+    // Validation optionnelle de la squad si fournie
+    if (squad) {
+      const squadValidation = validateSquad(squad);
+      if (!squadValidation.valid) {
+        return res.status(400).json({ ok: false, message: squadValidation.error });
+      }
+    }
+
+    // Validation optionnelle du destinataire si fourni
+    if (idDestinataire) {
+      const userIdValidation = validateUserId(idDestinataire);
+      if (!userIdValidation.valid) {
+        return res.status(400).json({ ok: false, message: userIdValidation.error });
+      }
+    }
+
+    // Appel au service pour envoyer le message
     const result = await messageService.envoyerMessage(idExpediteur, idDestinataire, titre, contenu, squad);
-    console.log('envoyerMessageController DB result:', result);
+    logger.info(`Message inséré avec succès: ${JSON.stringify(result)}`);
+
     const msg = squad ? `Message envoyé à la squad ${squad}` : 'Message envoyé avec succès';
     return res.status(201).json({ ok: true, message: msg, data: result });
   } catch (err) {
-    console.error(err);
+    logger.error('[envoyerMessage] Erreur', err);
     const status = err && err.status ? err.status : 500;
     const message = err && err.message ? err.message : 'Erreur serveur';
     return res.status(status).json({ ok: false, message });
   }
-};
+};;
 
-// Commercial récupère ses messages
+/**
+ * GET /api/message/
+ * Récupère tous les messages reçus par l'utilisateur authentifié
+ * Authentification: User requis
+ */
 const getMessagesController = async (req, res) => {
   try {
     const messages = await messageService.getMessagesUtilisateur(req.user.id);
+    logger.debug('getMessagesUtilisateur', { userId: req.user.id, count: messages.length });
     return res.status(200).json({ ok: true, data: messages });
   } catch (err) {
-    console.error(err);
+    logger.error('[getMessages] Erreur', err);
     const status = err && err.status ? err.status : 500;
     const message = err && err.message ? err.message : 'Erreur serveur';
     return res.status(status).json({ ok: false, message });
   }
 };
 
-// Commercial marque un message comme lu
+/**
+ * PATCH /api/message/:idMessage/lu
+ * Marque un message comme lu
+ * Authentification: User requis
+ * Sécurité: L'utilisateur ne peut marquer que ses propres messages comme lus
+ */
 const marquerLuController = async (req, res) => {
   try {
     const { idMessage } = req.params;
     const idUser = req.user.id;
+    logger.info(`marquerLu message ${idMessage} par user ${idUser}`);
+    
     await messageService.marquerLu(idMessage, idUser);
     return res.status(200).json({ ok: true, message: 'Message marqué comme lu' });
   } catch (err) {
-    console.error(err);
+    logger.error('[marquerLu] Erreur', err);
     const status = err && err.status ? err.status : 500;
     const message = err && err.message ? err.message : 'Erreur serveur';
     return res.status(status).json({ ok: false, message });
