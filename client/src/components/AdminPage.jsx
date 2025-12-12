@@ -10,22 +10,46 @@ export default function AdminPage({ user, onLogout }) {
 
   useEffect(() => {
     if (!token) return
-    fetch(`${API_BASE}/admin/users`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json())
-      .then(d => { if (d.ok) setUsers(d.data || []) 
-        else setError(d.message) })
-      .catch(() => setError('Impossible de charger les utilisateurs'))
 
-    fetch(`${API_BASE}/admin/stats`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json())
-      .then(d => { if (d.ok) setStats(d.data || d) })
-      .catch(() => {})
+    const load = async () => {
+      try {
+        const [uRes, sRes] = await Promise.all([
+          fetch(`${API_BASE}/admin/users`, { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`${API_BASE}/admin/stats`, { headers: { Authorization: `Bearer ${token}` } })
+        ])
+
+        // users
+        const uJson = await uRes.json().catch(() => null)
+        if (uJson && uJson.ok) setUsers(uJson.data || [])
+
+        // stats (tolerant mapping)
+        const sJson = await sRes.json().catch(() => null)
+        if (sJson && sJson.ok) {
+          const d = sJson.data || sJson
+          setStats(d)
+        }
+      } catch (err) {
+        // ignore network errors for UI resilience
+      }
+    }
+
+    load()
+
+    // poll stats every 30s
+    const tid = setInterval(() => { load() }, 30000)
+    return () => clearInterval(tid)
   }, [])
 
   return (
     <div className="card">
       <div className="brand">EvalCommerce — Admin</div>
       <div style={{marginBottom:12}}>Bonjour <strong>{user.username}</strong></div>
+      {/* Statique / Résumé rapide */}
+      <div className="kpi-grid" style={{marginBottom:12}}>
+        <div className="kpi-card flex-row"><div className="kpi-icon">👥</div><div><div className="kpi-title">Utilisateurs</div><div className="kpi-value">{users.length || '—'}</div></div></div>
+        <div className="kpi-card flex-row"><div className="kpi-icon">📈</div><div><div className="kpi-title">Ventes totales</div><div className="kpi-value">{(stats && (stats.salesTotal || stats.totalSales || stats.sales_total)) ? (stats.salesTotal || stats.totalSales || stats.sales_total) : '—'}</div></div></div>
+        <div className="kpi-card flex-row"><div className="kpi-icon">✉️</div><div><div className="kpi-title">Messages</div><div className="kpi-value">{(stats && (stats.messageCount || stats.message_count)) ? (stats.messageCount || stats.message_count) : '—'}</div></div></div>
+      </div>
 
       <h3>Utilisateurs</h3>
       {error && <div style={{color:'crimson'}}>{error}</div>}

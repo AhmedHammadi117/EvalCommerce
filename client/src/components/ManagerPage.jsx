@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
@@ -6,6 +6,37 @@ export default function ManagerPage({ user, onLogout }) {
   const [form, setForm] = useState({ idDestinataire: '', squad: '', titre: '', contenu: '', toSquad: false })
   const [message, setMessage] = useState(null)
   const token = localStorage.getItem('token')
+
+  // Statique: données rapides pour l'UI (peuvent être remplacées par des appels API)
+  const staticKpis = {
+    teamSize: 8,
+    activeThisWeek: 5,
+    messagesSent: 12
+  }
+  const [kpis, setKpis] = useState(staticKpis)
+
+  useEffect(() => {
+    // Essayer de récupérer des KPI dynamiques si l'API admin est disponible
+    const load = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/admin/stats`, { headers: { Authorization: `Bearer ${token}` } })
+        if (!res.ok) return // probable 403 pour managers
+        const data = await res.json()
+        if (data && data.ok && data.data) {
+          // mapper des champs potentiels vers nos KPI (tolérant aux noms différents)
+          const d = data.data
+          setKpis({
+            teamSize: d.teamSize || d.usersCount || kpis.teamSize,
+            activeThisWeek: d.activeThisWeek || d.active || kpis.activeThisWeek,
+            messagesSent: d.messageCount || d.messages || kpis.messagesSent
+          })
+        }
+      } catch (err) {
+        // silent fail -> garder static
+      }
+    }
+    load()
+  }, [])
 
   const submit = async (e) => {
     e.preventDefault()
@@ -35,6 +66,13 @@ export default function ManagerPage({ user, onLogout }) {
     <div className="card">
       <div className="brand">EvalCommerce — Espace gestionnaire</div>
       <div style={{marginBottom:12}}>Bonjour <strong>{user.username}</strong></div>
+
+      {/* Statique: KPI */}
+      <div className="kpi-grid" style={{marginBottom:12}}>
+        <div className="kpi-card flex-row"><div className="kpi-icon">👥</div><div><div className="kpi-title">Taille équipe</div><div className="kpi-value">{kpis.teamSize}</div></div></div>
+        <div className="kpi-card flex-row"><div className="kpi-icon">⚡</div><div><div className="kpi-title">Actifs cette semaine</div><div className="kpi-value">{kpis.activeThisWeek}</div></div></div>
+        <div className="kpi-card flex-row"><div className="kpi-icon">✉️</div><div><div className="kpi-title">Messages envoyés</div><div className="kpi-value">{kpis.messagesSent}</div></div></div>
+      </div>
 
       <h3>Envoyer un message</h3>
       <form onSubmit={submit} style={{marginBottom:12}}>

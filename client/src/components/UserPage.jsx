@@ -10,6 +10,7 @@ export default function UserPage({ user, onLogout }) {
   const [form, setForm] = useState({ id_produit: '', quantite: '', adresse: '' })
 
   const token = localStorage.getItem('token')
+  const [kpis, setKpis] = useState({ unread: 0, totalSales: 0, lastSale: '—' })
 
   useEffect(() => {
     if (!token) return
@@ -30,6 +31,14 @@ export default function UserPage({ user, onLogout }) {
       .then(d => { if (d.ok && d.data) setVentes(d.data) })
       .catch(() => {})
   }, [])
+
+  // Recompute KPIs whenever messages or ventes change
+  useEffect(() => {
+    const unread = messages.filter(m => !m.lu).length
+    const totalSales = ventes.length
+    const lastSale = (ventes && ventes[0] && ventes[0].date_vente) ? new Date(ventes[0].date_vente).toLocaleDateString() : '—'
+    setKpis({ unread, totalSales, lastSale })
+  }, [messages, ventes])
 
   const submitVente = async (e) => {
     e.preventDefault()
@@ -69,6 +78,31 @@ export default function UserPage({ user, onLogout }) {
     <div className="card">
       <div className="brand">EvalCommerce — Espace commercial</div>
       <div style={{marginBottom:12}}>Bonjour <strong>{user.username}</strong> — squad: {user.squad || 'N/A'}</div>
+
+      {/* KPI dynamique (basé sur les données chargées) */}
+      <div className="kpi-grid" style={{marginBottom:12}}>
+        <div className="kpi-card flex-row">
+          <div className="kpi-icon">📩</div>
+          <div>
+            <div className="kpi-title">Messages non lus</div>
+            <div className="kpi-value">{kpis.unread}</div>
+          </div>
+        </div>
+        <div className="kpi-card flex-row">
+          <div className="kpi-icon">💰</div>
+          <div>
+            <div className="kpi-title">Ventes totales</div>
+            <div className="kpi-value">{kpis.totalSales}</div>
+          </div>
+        </div>
+        <div className="kpi-card flex-row">
+          <div className="kpi-icon">🕘</div>
+          <div>
+            <div className="kpi-title">Dernière vente</div>
+            <div className="kpi-value">{kpis.lastSale}</div>
+          </div>
+        </div>
+      </div>
 
       <h3>Mes messages</h3>
       {loadingMsgs ? (<div>Chargement...</div>) : (
