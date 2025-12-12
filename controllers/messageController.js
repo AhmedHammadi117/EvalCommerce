@@ -1,4 +1,4 @@
-// controllers/messageController.js
+// Contrôleur messages: orchestration validation -> service (manager -> user/squad)
 /**
  * Contrôleur pour gérer les opérations de messages
  * Responsable de valider les entrées et orchestrer les appels au service

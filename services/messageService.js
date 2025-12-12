@@ -1,4 +1,4 @@
-// services/messageService.js
+// Service messages: accès DB, vérifications et insertion (single / bulk squad)
 /**
  * Service pour gérer les opérations de messages en base de données
  * Responsible for: DB queries, validation d'existence, bulk inserts

@@ -4,6 +4,7 @@
  * Tous les endpoints sont protégés par JWT
  * Les rôles sont vérifiés: manager pour envoyer, user pour recevoir
  */
+// Routes sous /api/message — envoi (manager) et lecture (user)
 const express = require('express');
 const router = express.Router();
 const { verifyToken, requireRole } = require('../middleware/auth');

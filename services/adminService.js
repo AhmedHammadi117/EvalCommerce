@@ -1,4 +1,4 @@
-// filepath: services/adminService.js
+// AdminService: accès DB pour users + génération des statistiques (utilisé par controllers)
 /**
  * Service administrateur pour gérer les utilisateurs et statistiques
  * Requiert le rôle admin pour tous les endpoints

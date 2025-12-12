@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 
+// ManagerPage: envoi de messages (individuel ou squad)
+// Le manager envoie POST /api/message/send avec token Authorization
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 export default function ManagerPage({ user, onLogout }) {
@@ -16,7 +18,7 @@ export default function ManagerPage({ user, onLogout }) {
   const [kpis, setKpis] = useState(staticKpis)
 
   useEffect(() => {
-    // Essayer de récupérer des KPI dynamiques si l'API admin est disponible
+    // Essayer de récupérer des KPI dynamiques si l'API admin est disponible (403 possible)
     const load = async () => {
       try {
         const res = await fetch(`${API_BASE}/admin/stats`, { headers: { Authorization: `Bearer ${token}` } })

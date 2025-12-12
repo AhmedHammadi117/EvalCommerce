@@ -72,6 +72,35 @@ CREATE TABLE users (
 
 #### `MESSAGE`
 ```sql
+
+## 🔌 Intégration Backend ↔ Frontend
+- Backend écoute par défaut sur `http://localhost:3000` (configurable via `.env` `PORT`).
+- Frontend dev (Vite) tourne par défaut sur `http://localhost:5173` et doit définir `VITE_API_URL` pour pointer vers le backend en dev.
+- Flow d'authentification : `POST /login` → réponse `{ ok, token, user }` → stocker `token` dans `localStorage` → envoyer `Authorization: Bearer <token>` sur les routes protégées.
+
+## Démarrage local (rapide)
+1) Installer dépendances backend et lancer le serveur :
+
+```powershell
+npm install
+npm start
+```
+
+2) Lancer le client React (dossier `client`) :
+
+```powershell
+cd client
+npm install
+npm run dev
+```
+
+3) Variables importantes (fichier `.env` à la racine du backend):
+- `PORT` (ex: 3000)
+- `DB_HOST`, `DB_USER`, `DB_PASS`, `DB_NAME` (MySQL)
+- `JWT_SECRET`
+
+## Archivage
+Les fichiers legacy ont été déplacés vers `ARCHIVE_SUGGESTIONS.md` et/ou `archiver/` ; vérifier avant le push final.
 CREATE TABLE MESSAGE (
   idMessage INT PRIMARY KEY AUTO_INCREMENT,
   idExpediteur INT NOT NULL,

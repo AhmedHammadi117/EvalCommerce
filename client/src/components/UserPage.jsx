@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react'
 
+// UserPage: liste messages + marquer lu + ajouter vente
+// Utilise `API_BASE` et envoie `Authorization: Bearer <token>` récupéré depuis localStorage
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 export default function UserPage({ user, onLogout }) {

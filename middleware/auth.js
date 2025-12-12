@@ -1,6 +1,7 @@
 
 
 
+// Middleware d'auth: vérifie JWT puis `req.user` contient {id, username, role, squad}
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 

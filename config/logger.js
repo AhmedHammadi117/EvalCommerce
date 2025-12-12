@@ -1,4 +1,4 @@
-// filepath: config/logger.js
+// Logger centralisé (simple) — utilitaire de logs lisibles en dev
 /**
  * Logger centralisé avec formatage consistant
  * Utilise des emojis pour la lisibilité et codes de couleur

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 
+// Login component: envoie POST /login, stocke `token` dans localStorage et appelle `onLogin(user)`
 export default function Login({ onLogin }) {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -17,7 +18,7 @@ export default function Login({ onLogin }) {
       })
       const data = await res.json()
       if (!res.ok) return setError(data.message || 'Erreur')
-      // Stocker token en localStorage pour usage
+      // Stocker token en localStorage pour usage par le client (Authorization header)
       localStorage.setItem('token', data.token)
       onLogin(data.user)
     } catch (err) {

@@ -1,3 +1,4 @@
+// backend entrypoint: configure middleware, routes and start server
 const express = require('express');
 const app = express();
 const cors = require('cors');

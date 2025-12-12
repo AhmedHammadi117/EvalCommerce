@@ -4,7 +4,7 @@
 
 require('dotenv').config();           // Charge les variables d'environnement si nécessaire
 const bcrypt = require('bcryptjs');   // bcryptjs évite des problèmes de compilation natifs
-const pool = require('./config/db');  // Utilise ta connexion existante (adapter si nécessaire)
+const pool = require('../config/db');  // Utilise ta connexion existante (adapter si nécessaire)
 
 (async () => {
   try {

@@ -1,4 +1,4 @@
-// middleware/validation.js
+// Validation helpers: titre/contenu/squad/id (retournent {valid, error?})
 // Fonctions de validation des données entrantes
 
 const CONSTANTS = require('../config/constants');

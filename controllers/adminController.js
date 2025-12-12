@@ -1,4 +1,4 @@
-// filepath: controllers/adminController.js
+// AdminController: orchestre les appels de `services/adminService` (CRUD & stats)
 /**
  * Contrôleur pour les opérations administrateur
  * Gestion des utilisateurs et statistiques

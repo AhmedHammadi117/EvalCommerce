@@ -1,4 +1,4 @@
-// routes/vente.js
+// Routes sous /vente — gestion des ventes (utilisateur)
 const express = require('express');
 const router = express.Router();
 const db = require('../config/db'); // connexion MySQL (callback style possible)

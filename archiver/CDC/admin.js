@@ -1,6 +1,7 @@
+// Route simple de test admin: nécessite JWT + rôle 'admin'
 const express = require('express');
 const router = express.Router();
-const {verifyToken, requireRole} = require('../middleware/auth');
+const {verifyToken, requireRole} = require('../../middleware/auth');
 
 /**
  * GET /admin

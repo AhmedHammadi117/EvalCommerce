@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 
+// App: choisit la vue en fonction du `user.role` retourné par le backend au login
 import Login from './components/Login'
 import Dashboard from './components/Dashboard'
 import UserPage from './components/UserPage'

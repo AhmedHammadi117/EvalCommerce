@@ -1,4 +1,4 @@
-// config/constants.js
+// Constantes partagées: rôles, squads, messages d'erreur et validations
 // Centralisation des constantes et valeurs fixes du projet
 
 module.exports = {
