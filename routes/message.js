@@ -34,7 +34,8 @@ router.post('/send',
   verifyToken,                    // Vérifier le token JWT
   requireRole('manager'),         // Vérifier le rôle = manager
   (req, res, next) => {           // Log la requête
-    console.log('📤 [POST /send] Manager ID:', req.user.id);
+    const logger = require('../config/logger');
+    logger.info(`[POST /send] Manager ID: ${req.user.id}`);
     next();
   },
   envoyerMessageController        // Traiter la requête
@@ -55,6 +56,7 @@ router.get('/',
 );
 
 /**
+
  * PATCH /api/message/:idMessage/lu
  * Marque un message comme lu
  * Authentification: Oui (JWT)

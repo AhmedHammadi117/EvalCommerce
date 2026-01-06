@@ -27,7 +27,6 @@ const verifyToken = (req, res, next) => {
   // Vérifier la validité du token avec la clé secrète
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
-      console.warn('⚠️  [JWT] Token invalide:', err.message);
       return res.status(401).json({ message: 'Token invalide ou expiré' });
     }
     
@@ -56,7 +55,6 @@ const requireRole = (role) => (req, res, next) => {
   
   // Vérifier que le rôle correspond
   if (req.user.role !== role) {
-    console.warn(`⚠️  [AUTH] Accès refusé: role=${req.user.role}, requis=${role}`);
     return res.status(403).json({ message: 'Accès refusé' });
   }
   

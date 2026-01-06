@@ -192,11 +192,10 @@ const getSquadStats = async () => {
   const sql = `
     SELECT 
       u.squad,
-      COUNT(u.id) as nombre_utilisateurs,
-      SUM(CASE WHEN u.role = 'manager' THEN 1 ELSE 0 END) as managers,
-      SUM(CASE WHEN u.role = 'user' THEN 1 ELSE 0 END) as utilisateurs,
-      SUM(v.quantite) as ventes_totales,
-      COUNT(DISTINCT v.id_vente) as nombre_ventes
+      COUNT(DISTINCT CASE WHEN u.role = 'user' THEN u.id END) as nombre_utilisateurs,
+      COUNT(DISTINCT CASE WHEN u.role = 'manager' THEN u.id END) as managers,
+      COUNT(DISTINCT v.id_vente) as nombre_ventes,
+      COALESCE(SUM(v.quantite), 0) as quantite_totale
     FROM users u
     LEFT JOIN vente v ON u.id = v.id_user
     WHERE u.squad IS NOT NULL

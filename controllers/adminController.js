@@ -15,7 +15,8 @@ const getAllUsersController = async (req, res) => {
       data: users
     });
   } catch (err) {
-    console.error('❌ [getAllUsers] Erreur:', err.message);
+    const logger = require('../config/logger');
+    logger.error('[getAllUsers] Erreur', err);
     return res.status(500).json({
       ok: false,
       message: 'Erreur serveur interne'
@@ -128,7 +129,8 @@ const getStatsController = async (req, res) => {
       data: dashboard
     });
   } catch (err) {
-    console.error('❌ [getStats] Erreur:', err.message);
+    const logger = require('../config/logger');
+    logger.error('[getStats] Erreur', err);
     return res.status(500).json({
       ok: false,
       message: 'Erreur serveur interne'

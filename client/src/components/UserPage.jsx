@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import UserStats from './UserStats'
 
 // UserPage: liste messages + marquer lu + ajouter vente
 // Utilise `API_BASE` et envoie `Authorization: Bearer <token>` récupéré depuis localStorage
@@ -10,6 +11,7 @@ export default function UserPage({ user, onLogout }) {
   const [messages, setMessages] = useState([])
   const [loadingMsgs, setLoadingMsgs] = useState(true)
   const [form, setForm] = useState({ id_produit: '', quantite: '', adresse: '' })
+  const [showOldMessages, setShowOldMessages] = useState(false)
 
   const token = localStorage.getItem('token')
   const [kpis, setKpis] = useState({ unread: 0, totalSales: 0, lastSale: '—' })
@@ -70,11 +72,15 @@ export default function UserPage({ user, onLogout }) {
       if (!res.ok) return setMessage(data.message || 'Erreur')
       // mettre à jour localement
       setMessages(prev => prev.map(m => m.idMessage === idMessage ? { ...m, lu: 1 } : m))
-      setMessage('Message marqué comme lu')
+      setMessage('✅ Message marqué comme lu')
+      setTimeout(() => setMessage(null), 2000)
     } catch (err) {
       setMessage('Impossible de contacter le serveur')
     }
   }
+
+  // Filtrer les messages : non lus par défaut, ou tous si showOldMessages
+  const displayedMessages = showOldMessages ? messages : messages.filter(m => !m.lu)
 
   return (
     <div className="card">
@@ -107,21 +113,35 @@ export default function UserPage({ user, onLogout }) {
       </div>
 
       <h3>Mes messages</h3>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
+        <button 
+          style={{background:showOldMessages?'#64748b':'#2563eb',padding:'8px 14px',borderRadius:8,fontSize:14,cursor:'pointer'}} 
+          onClick={()=>setShowOldMessages(!showOldMessages)}>
+          {showOldMessages ? '📬 Messages récents' : '📂 Anciens messages'}
+        </button>
+        <span style={{fontSize:13,color:'#64748b'}}>
+          {showOldMessages ? `${messages.length} messages au total` : `${displayedMessages.length} message(s) non lu(s)`}
+        </span>
+      </div>
       {loadingMsgs ? (<div>Chargement...</div>) : (
         <div className="messages">
-          {messages.length === 0 ? (
-            <div>Aucun message</div>
+          {displayedMessages.length === 0 ? (
+            <div style={{color:'#64748b',padding:20,textAlign:'center'}}>
+              {showOldMessages ? 'Aucun message' : 'Aucun nouveau message 🎉'}
+            </div>
           ) : (
             <ul>
-              {messages.map(m => (
-                <li key={m.idMessage} className={m.lu ? 'read' : 'unread'}>
+              {displayedMessages.map(m => (
+                <li key={m.idMessage} className={m.lu ? 'read' : 'unread'} style={{position:'relative'}}>
                   <div className="msg-head">
                     <strong>{m.titre}</strong>
                     <span className="date">{new Date(m.dateEnvoi).toLocaleString()}</span>
                   </div>
                   <div className="msg-body">{m.contenu}</div>
-                  <div className="msg-meta">De: #{m.idExpediteur}</div>
-                  {!m.lu && <button className="small" onClick={() => markAsRead(m.idMessage)}>Marquer lu</button>}
+                  <div className="msg-meta">De: Manager #{m.idExpediteur}</div>
+                  <div style={{display:'flex',gap:8,marginTop:8}}>
+                    {!m.lu && <button className="small" onClick={() => markAsRead(m.idMessage)}>✅ Marquer lu</button>}
+                  </div>
                 </li>
               ))}
             </ul>
@@ -138,14 +158,9 @@ export default function UserPage({ user, onLogout }) {
       </form>
       {message && <div style={{color:'crimson'}}>{message}</div>}
 
-      <h3>Historique des ventes</h3>
-      <div>
-        {ventes && ventes.length ? (
-          <ul>
-            {ventes.map(v => <li key={v.id_vente}>{v.date_vente} — produit {v.id_produit} ×{v.quantite} — {v.adresse}</li>)}
-          </ul>
-        ) : <div>Aucune vente</div>}
-      </div>
+
+      <h3 style={{marginTop:24}}>Historique des ventes</h3>
+      <UserStats token={token} ventes={ventes} />
 
       <div style={{marginTop:12}}>
         <button onClick={() => { localStorage.clear(); onLogout(); }}>Se déconnecter</button>

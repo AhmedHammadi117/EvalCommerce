@@ -14,8 +14,15 @@ const logger = require('../config/logger');
  */
 const envoyerMessageController = async (req, res) => {
   try {
-    const { idDestinataire, titre, contenu, squad } = req.body;
+    let { idDestinataire, titre, contenu, squad } = req.body;
     const idExpediteur = req.user.id;
+    
+    // Si squad='ALL', remplacer par la squad du manager
+    if (squad === 'ALL' && req.user.squad) {
+      squad = req.user.squad;
+      logger.info(`Squad 'ALL' remplacée par la squad du manager: ${squad}`);
+    }
+    
     logger.info(`envoyerMessage appelé par user: ${idExpediteur} | destinataire: ${idDestinataire || 'N/A'} | squad: ${squad || 'N/A'}`);
 
     // Validation : au moins un destinataire OU une squad est requis
