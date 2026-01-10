@@ -1,0 +1,10 @@
+# Dépendances backend Node.js (npm install)
+bcryptjs
+cors
+dotenv
+express
+jsonwebtoken
+mysql2
+
+# Dépendances développement
+nodemon
