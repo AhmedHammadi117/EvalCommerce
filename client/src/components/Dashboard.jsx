@@ -1,5 +1,7 @@
 import React from 'react'
 
+
+
 export default function Dashboard({ user, onLogout }) {
   return (
     <div className="card">

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import ManagerStats from './ManagerStats'
 
+
+
 // ManagerPage: affichage moderne avec stats et messagerie pour le manager
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 

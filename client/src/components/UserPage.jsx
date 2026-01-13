@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import UserStats from './UserStats'
 
+
+
 // UserPage: liste messages + marquer lu + ajouter vente
 // Utilise `API_BASE` et envoie `Authorization: Bearer <token>` récupéré depuis localStorage
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000'

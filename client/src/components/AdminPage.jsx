@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import AdminUsers from './AdminUsers'
 import AdminStats from './AdminStats'
 
+
 // AdminPage: Dashboard moderne pour l'admin
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 

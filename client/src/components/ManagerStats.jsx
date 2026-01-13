@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
+
 // Affichage moderne des stats de l'équipe du manager
 export default function ManagerStats({ token }) {
   const [stats, setStats] = useState([]);

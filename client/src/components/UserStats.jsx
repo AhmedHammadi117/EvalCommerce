@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
+
 // Affichage moderne de l'historique des ventes utilisateur
 // Si ventes est fourni en props, on l'utilise directement (pas de fetch)
 export default function UserStats({ token, ventes: ventesProp }) {
@@ -15,9 +16,12 @@ export default function UserStats({ token, ventes: ventesProp }) {
     }
     if (!token) return;
     setLoading(true);
-    fetch(import.meta.env.VITE_API_URL + '/vente', {
-      headers: { 'Authorization': 'Bearer ' + token }
-    })
+    const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+fetch(`${API_BASE}/vente`, {
+  headers: { 'Authorization': 'Bearer ' + token }
+})
+
       .then(res => res.json())
       .then(data => {
         if (data.ok) setVentes(data.data);
