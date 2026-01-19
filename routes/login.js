@@ -70,7 +70,7 @@ router.post('/forgot-password', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const { username, password } = req.body;
-    if (!username || !password) return res.status(400).json({ message: 'deux champs manque' });
+    if (!username || !password) return res.status(400).json({ message: 'champs manque' });
 
     // On récupère aussi le champ squad (utile pour les managers)
     const [rows] = await pool.query('SELECT id, username, password, role, squad FROM users WHERE username = ?', [username]);

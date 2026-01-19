@@ -28,7 +28,7 @@ const envoyerMessageController = async (req, res) => {
     // Validation du contenu
     const contentValidation = validateContenu(contenu);
     if (!contentValidation.valid) return res.status(400).json({ ok: false, message: contentValidation.error });
-    // Validation squad si fournie
+    // Validation équipe si fournie
     if (squad) {
       const squadValidation = validateSquad(squad);
       if (!squadValidation.valid) return res.status(400).json({ ok: false, message: squadValidation.error });
@@ -42,7 +42,7 @@ const envoyerMessageController = async (req, res) => {
     const result = await messageService.envoyerMessage(idExpediteur, idDestinataire, titre, contenu, squad);
     logger.info(`Message inséré avec succès: ${JSON.stringify(result)}`);
 
-    const msg = squad ? `Message envoyé à la squad ${squad}` : 'Message envoyé avec succès';
+    const msg = squad ? `Message envoyé à l'équipe ${squad}` : 'Message envoyé avec succès';
     return res.status(201).json({ ok: true, message: msg, data: result });
   } catch (err) {
     logger.error('[envoyerMessage] Erreur', err);

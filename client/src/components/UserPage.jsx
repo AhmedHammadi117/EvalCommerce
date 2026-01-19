@@ -85,7 +85,7 @@ export default function UserPage({ user, onLogout }) {
   return (
     <div className="card">
       <div className="brand">EvalCommerce — Espace commercial</div>
-      <div style={{marginBottom:12}}>Bonjour <strong>{user.username}</strong> — squad: {user.squad || 'N/A'}</div>
+      <div style={{marginBottom:12}}>Bonjour <strong>{user.username}</strong> — équipe: {user.squad || 'N/A'}</div>
 
       {/* KPI dynamique (basé sur les données chargées) */}
       <div className="kpi-grid" style={{marginBottom:12}}>
@@ -138,7 +138,7 @@ export default function UserPage({ user, onLogout }) {
                     <span className="date">{new Date(m.dateEnvoi).toLocaleString()}</span>
                   </div>
                   <div className="msg-body">{m.contenu}</div>
-                  <div className="msg-meta">De: Manager #{m.idExpediteur}</div>
+                  <div className="msg-meta">De: {m.expediteurUsername ? `Manager ${m.expediteurUsername} (ID: ${m.idExpediteur})` : `Manager #${m.idExpediteur}`}</div>
                   <div style={{display:'flex',gap:8,marginTop:8}}>
                     {!m.lu && <button className="small" onClick={() => markAsRead(m.idMessage)}>✅ Marquer lu</button>}
                   </div>

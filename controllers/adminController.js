@@ -1,5 +1,6 @@
 // Contrôleur admin : gestion utilisateurs et stats (oriente vers adminService)
 const adminService = require('../services/adminService');
+const { validateDateNaissance } = require('../middleware/validation');
 
 const getAllUsersController = async (req, res) => {
   try {
@@ -43,6 +44,14 @@ const createUserController = async (req, res) => {
       return res.status(400).json({ ok: false, message: 'Rôle invalide. Valeurs: admin, manager, user' });
     }
 
+    // Validation de la date de naissance
+    if (date_naissance) {
+      const dateValidation = validateDateNaissance(date_naissance);
+      if (!dateValidation.valid) {
+        return res.status(400).json({ ok: false, message: dateValidation.error });
+      }
+    }
+
     const newUser = await adminService.createUser(username, password, role, squad, nom, prenom, date_naissance);
     return res.status(201).json({
       ok: true,
@@ -68,6 +77,14 @@ const updateUserController = async (req, res) => {
         ok: false,
         message: 'Champs manquants: username, role requis'
       });
+    }
+
+    // Validation de la date de naissance
+    if (date_naissance) {
+      const dateValidation = validateDateNaissance(date_naissance);
+      if (!dateValidation.valid) {
+        return res.status(400).json({ ok: false, message: dateValidation.error });
+      }
     }
 
     const updated = await adminService.updateUser(id, username, role, squad, nom, prenom, date_naissance);
@@ -196,6 +213,36 @@ const getSquadStatsController = async (req, res) => {
   }
 };
 
+const getAllVentesController = async (req, res) => {
+  try {
+    const ventes = await adminService.getAllVentes();
+    return res.status(200).json({
+      ok: true,
+      data: ventes
+    });
+  } catch (err) {
+    return res.status(500).json({
+      ok: false,
+      message: 'Erreur serveur interne'
+    });
+  }
+};
+
+const getAllMessagesController = async (req, res) => {
+  try {
+    const messages = await adminService.getAllMessages();
+    return res.status(200).json({
+      ok: true,
+      data: messages
+    });
+  } catch (err) {
+    return res.status(500).json({
+      ok: false,
+      message: 'Erreur serveur interne'
+    });
+  }
+};
+
 module.exports = {
   getAllUsersController,
   getUserByIdController,
@@ -207,5 +254,7 @@ module.exports = {
   getSalesPerUserController,
   getProductStatsController,
   getMessageStatsController,
-  getSquadStatsController
+  getSquadStatsController,
+  getAllVentesController,
+  getAllMessagesController
 };

@@ -1,17 +1,17 @@
-// Service messages : gestion DB, vérification, insertion (single/squad)
+// Service messages : gestion DB, vérification, insertion (single/équipe)
 const db = require('../config/db');
 const logger = require('../config/logger');
 
-// Envoie un message à un utilisateur ou une squad
+// Envoie un message à un utilisateur ou une équipe
 const envoyerMessage = async (idExpediteur, idDestinataire, titre, contenu, squad = null) => {
   // Vérifier que l'expéditeur existe
   const [expRows] = await db.execute('SELECT id FROM users WHERE id = ?', [idExpediteur]);
   if (!expRows?.length) throw Object.assign(new Error('Expéditeur introuvable'), { status: 400 });
 
-  // Envoi à une squad entière (bulk insert)
+  // Envoi à une équipe entière (bulk insert)
   if (squad) {
     const [users] = await db.execute('SELECT id FROM users WHERE squad = ? AND role = ?', [squad, 'user']);
-    if (!users?.length) throw Object.assign(new Error('Aucun destinataire trouvé pour cette squad'), { status: 404 });
+    if (!users?.length) throw Object.assign(new Error('Aucun destinataire trouvé pour cette équipe'), { status: 404 });
     const values = users.map(u => [idExpediteur, u.id, titre, contenu]);
     const [result] = await db.query('INSERT INTO MESSAGE (idExpediteur, idDestinataire, titre, contenu) VALUES ?', [values]);
     logger.info(`Squad broadcast: squad=${squad} -> ${result.affectedRows} inserts`);
@@ -26,13 +26,14 @@ const envoyerMessage = async (idExpediteur, idDestinataire, titre, contenu, squa
   return { insertId: result.insertId };
 };
 
-// Récupérer les messages d’un utilisateur
+// Récupérer les messages d’un utilisateur (avec username de l'expéditeur)
 const getMessagesUtilisateur = async (id) => {
   const sql = `
-    SELECT idMessage, titre, contenu, dateEnvoi, lu, idExpediteur 
-    FROM MESSAGE 
-    WHERE idDestinataire = ?
-    ORDER BY dateEnvoi DESC
+    SELECT m.idMessage, m.titre, m.contenu, m.dateEnvoi, m.lu, m.idExpediteur, u.username AS expediteurUsername
+    FROM MESSAGE m
+    LEFT JOIN users u ON m.idExpediteur = u.id
+    WHERE m.idDestinataire = ?
+    ORDER BY m.dateEnvoi DESC
   `;
   const [rows] = await db.execute(sql, [id]);
   return rows;

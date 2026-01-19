@@ -1,4 +1,4 @@
-// Validation helpers: titre/contenu/squad/id (retournent {valid, error?})
+// Validation helpers: titre/contenu/équipe/id (retournent {valid, error?})
 // Fonctions de validation des données entrantes
 
 const CONSTANTS = require('../config/constants');
@@ -40,16 +40,13 @@ const validateContenu = (contenu) => {
 };
 
 /**
- * Valide une squad
- * @param {string} squad - Le nom de la squad à valider
+ * Valide une équipe (accepte n'importe quelle string non vide)
+ * @param {string} squad - Le nom de l'équipe à valider
  * @returns {object} { valid: boolean, error?: string }
  */
 const validateSquad = (squad) => {
-  if (!squad || typeof squad !== 'string') {
-    return { valid: false, error: 'Squad requise' };
-  }
-  if (!CONSTANTS.SQUADS.includes(squad.toUpperCase())) {
-    return { valid: false, error: `Squad invalide. Valeurs autorisées: ${CONSTANTS.SQUADS.join(', ')}` };
+  if (!squad || typeof squad !== 'string' || !squad.trim()) {
+    return { valid: false, error: 'Équipe requise' };
   }
   return { valid: true };
 };
@@ -67,9 +64,45 @@ const validateUserId = (id) => {
   return { valid: true };
 };
 
+/**
+ * Valide une date de naissance (âge entre 18 et 75 ans)
+ * @param {string} dateNaissance - La date de naissance au format ISO
+ * @returns {object} { valid: boolean, error?: string }
+ */
+const validateDateNaissance = (dateNaissance) => {
+  if (!dateNaissance) {
+    return { valid: false, error: 'Date de naissance requise' };
+  }
+
+  const birthDate = new Date(dateNaissance);
+  const today = new Date();
+
+  // Vérifier que la date est valide
+  if (isNaN(birthDate.getTime())) {
+    return { valid: false, error: 'Date de naissance invalide' };
+  }
+
+  // Calculer l'âge
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+
+  if (age < 18) {
+    return { valid: false, error: 'L\'utilisateur doit avoir au moins 18 ans' };
+  }
+  if (age > 75) {
+    return { valid: false, error: 'L\'utilisateur ne peut pas avoir plus de 75 ans' };
+  }
+
+  return { valid: true };
+};
+
 module.exports = {
   validateTitre,
   validateContenu,
   validateSquad,
-  validateUserId
+  validateUserId,
+  validateDateNaissance
 };

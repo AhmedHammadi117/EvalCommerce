@@ -17,7 +17,9 @@ const {
   getSalesPerUserController,
   getProductStatsController,
   getMessageStatsController,
-  getSquadStatsController
+  getSquadStatsController,
+  getAllVentesController,
+  getAllMessagesController
 } = require('../controllers/adminController');
 
 // ========== UTILISATEURS MANAGEMENT ==========
@@ -145,6 +147,28 @@ router.get('/stats/squads',
   verifyToken,
   requireRole('admin'),
   getSquadStatsController
+);
+
+/**
+ * GET /admin/ventes
+ * Récupère toutes les ventes avec détails
+ * Rôle requis: admin
+ */
+router.get('/ventes',
+  verifyToken,
+  requireRole('admin'),
+  getAllVentesController
+);
+
+/**
+ * GET /admin/messages
+ * Récupère tous les messages avec détails
+ * Rôle requis: admin
+ */
+router.get('/messages',
+  verifyToken,
+  requireRole('admin'),
+  getAllMessagesController
 );
 
 /**

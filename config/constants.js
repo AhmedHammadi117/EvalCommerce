@@ -1,4 +1,4 @@
-// Constantes partagées: rôles, squads, messages d'erreur et validations
+// Constantes partagées: rôles, équipes, messages d'erreur et validations
 // Centralisation des constantes et valeurs fixes du projet
 
 module.exports = {
@@ -9,8 +9,6 @@ module.exports = {
     USER: 'user'
   },
 
-  // Squads disponibles
-  SQUADS: ['A', 'B', 'C', 'D'],
 
   // Messages d'erreur standardisés
   ERRORS: {
@@ -21,7 +19,7 @@ module.exports = {
     ACCESS_DENIED: 'Accès refusé',
     USER_NOT_FOUND: 'Utilisateur introuvable',
     RECIPIENT_NOT_FOUND: 'Destinataire introuvable',
-    SQUAD_NO_RECIPIENTS: 'Aucun destinataire trouvé pour cette squad',
+    SQUAD_NO_RECIPIENTS: 'Aucun destinataire trouvé pour cette équipe',
     MESSAGE_NOT_FOUND: 'Message introuvable ou accès refusé',
     MISSING_FIELDS: 'Champs manquants',
     INVALID_INPUT: 'Entrée invalide',

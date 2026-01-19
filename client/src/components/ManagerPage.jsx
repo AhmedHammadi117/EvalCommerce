@@ -7,31 +7,53 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 export default function ManagerPage({ user, onLogout }) {
   const token = localStorage.getItem('token')
   
-  // KPI statiques pour l'affichage rapide
-  const staticKpis = { teamSize: 8, activeThisWeek: 5, messagesSent: 12 }
-  const [kpis, setKpis] = useState(staticKpis)
+  // KPI initiaux
+  const [kpis, setKpis] = useState({ teamSize: 0, activeThisWeek: 0, messagesSent: 0 })
 
   useEffect(() => {
-    // Essayer de récupérer des KPI dynamiques si l'API admin est disponible (403 possible)
+    // Récupérer les vrais KPI depuis l'endpoint manager
     const load = async () => {
       try {
-        const res = await fetch(`${API_BASE}/admin/stats`, { headers: { Authorization: `Bearer ${token}` } })
-        if (!res.ok) return // probable 403 pour managers
+        const res = await fetch(`${API_BASE}/manager/stats`, { headers: { Authorization: `Bearer ${token}` } })
+        if (!res.ok) return
         const data = await res.json()
         if (data && data.ok && data.data) {
-          const d = data.data
+          // data.data est un tableau d'objets { user, ventes }
+          const teamSize = data.data.length
+          
+          // Calculer le nombre de commerciaux actifs cette semaine
+          const oneWeekAgo = new Date()
+          oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
+          const activeUsers = new Set()
+          
+          // Calculer le nombre total de ventes (messages envoyés)
+          let totalVentes = 0
+          
+          data.data.forEach(({ user, ventes }) => {
+            totalVentes += ventes.length
+            // Vérifier si ce user a fait une vente cette semaine
+            ventes.forEach(v => {
+              if (v.date_vente) {
+                const venteDate = new Date(v.date_vente)
+                if (venteDate >= oneWeekAgo) {
+                  activeUsers.add(user.id)
+                }
+              }
+            })
+          })
+          
           setKpis({
-            teamSize: d.teamSize || d.usersCount || kpis.teamSize,
-            activeThisWeek: d.activeThisWeek || d.active || kpis.activeThisWeek,
-            messagesSent: d.messageCount || d.messages || kpis.messagesSent
+            teamSize: teamSize,
+            activeThisWeek: activeUsers.size,
+            messagesSent: totalVentes
           })
         }
       } catch (err) {
-        // silent fail -> garder static
+        console.error('Erreur chargement KPI:', err)
       }
     }
-    load()
-  }, [])
+    if (token) load()
+  }, [token])
 
   return (
     <div className="card" style={{maxWidth:'1200px',width:'100%'}}>
@@ -39,7 +61,7 @@ export default function ManagerPage({ user, onLogout }) {
       <div style={{marginBottom:24,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
         <div>
           <div style={{fontSize:20,fontWeight:600,color:'#1e293b'}}>Bonjour <strong style={{color:'#2563eb'}}>{user.username}</strong></div>
-          <div style={{fontSize:14,color:'#64748b'}}>Tableau de bord gestionnaire — Squad {user.squad || 'N/A'}</div>
+          <div style={{fontSize:14,color:'#64748b'}}>Tableau de bord gestionnaire — Équipe {user.squad || 'N/A'}</div>
         </div>
         <button 
           style={{background:'#ef4444',color:'#fff',border:'none',borderRadius:8,padding:'10px 18px',cursor:'pointer',fontWeight:600}} 

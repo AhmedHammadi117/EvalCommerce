@@ -25,9 +25,41 @@ export default function AdminUsers({ token }) {
 
   useEffect(() => { if (token) load() }, [token])
 
+  // Fonction de validation de la date de naissance
+  const validateDateNaissance = (dateString) => {
+    if (!dateString) return { valid: false, error: 'Date de naissance requise' }
+    
+    const birthDate = new Date(dateString)
+    const today = new Date()
+    
+    // Calculer l'âge
+    let age = today.getFullYear() - birthDate.getFullYear()
+    const monthDiff = today.getMonth() - birthDate.getMonth()
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--
+    }
+    
+    if (age < 18) {
+      return { valid: false, error: 'L\'utilisateur doit avoir au moins 18 ans' }
+    }
+    if (age > 75) {
+      return { valid: false, error: 'L\'utilisateur ne peut pas avoir plus de 75 ans' }
+    }
+    
+    return { valid: true }
+  }
+
   // Création utilisateur avec les nouveaux champs
   const submitCreate = async (e) => {
     e.preventDefault()
+    
+    // Valider la date de naissance
+    const validation = validateDateNaissance(form.date_naissance)
+    if (!validation.valid) {
+      setError(validation.error)
+      return
+    }
+    
     try {
       const payload = {
         username: form.username,
@@ -41,6 +73,7 @@ export default function AdminUsers({ token }) {
       const res = await fetch(`${API_BASE}/admin/users`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) })
       const data = await res.json()
       if (!res.ok) return setError(data.message || 'Erreur création')
+      setError(null)
       setForm({ username: '', password: '', role: 'user', squad: '', nom: '', prenom: '', date_naissance: '' })
       load()
     } catch (err) { setError('Erreur réseau') }
@@ -63,6 +96,14 @@ export default function AdminUsers({ token }) {
   // Edition utilisateur avec les nouveaux champs
   const submitEdit = async (e) => {
     e.preventDefault()
+    
+    // Valider la date de naissance
+    const validation = validateDateNaissance(form.date_naissance)
+    if (!validation.valid) {
+      setError(validation.error)
+      return
+    }
+    
     try {
       const id = editing.id
       const payload = {
@@ -76,6 +117,7 @@ export default function AdminUsers({ token }) {
       const res = await fetch(`${API_BASE}/admin/users/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) })
       const data = await res.json()
       if (!res.ok) return setError(data.message || 'Erreur update')
+      setError(null)
       setEditing(null)
       setForm({ username: '', password: '', role: 'user', squad: '', nom: '', prenom: '', date_naissance: '' })
       load()
@@ -105,7 +147,7 @@ export default function AdminUsers({ token }) {
             <option value='manager'>Manager</option>
             <option value='admin'>Admin</option>
           </select>
-          <input className="input-modern" placeholder='Squad (A/B)' value={form.squad} onChange={e=>setForm({...form,squad:e.target.value})} style={{padding:12,borderRadius:8,border:'1px solid #e2e8f0',fontSize:16}} />
+          <input className="input-modern" placeholder='Équipe (A/B)' value={form.squad} onChange={e=>setForm({...form,squad:e.target.value})} style={{padding:12,borderRadius:8,border:'1px solid #e2e8f0',fontSize:16}} />
           <input className="input-modern" placeholder='Nom' value={form.nom} onChange={e=>setForm({...form,nom:e.target.value})} required style={{padding:12,borderRadius:8,border:'1px solid #e2e8f0',fontSize:16}} />
           <input className="input-modern" placeholder='Prénom' value={form.prenom} onChange={e=>setForm({...form,prenom:e.target.value})} required style={{padding:12,borderRadius:8,border:'1px solid #e2e8f0',fontSize:16}} />
           <input className="input-modern" type='date' placeholder='Date de naissance' value={form.date_naissance} onChange={e=>setForm({...form,date_naissance:e.target.value})} required style={{padding:12,borderRadius:8,border:'1px solid #e2e8f0',fontSize:16}} />
@@ -121,7 +163,7 @@ export default function AdminUsers({ token }) {
         {loading ? <div>Chargement...</div> : (
           <table style={{width:'100%',borderCollapse:'collapse'}}>
             <thead>
-              <tr><th style={{textAlign:'left',borderBottom:'1px solid #eee'}}>ID</th><th style={{textAlign:'left',borderBottom:'1px solid #eee'}}>Username</th><th style={{textAlign:'left',borderBottom:'1px solid #eee'}}>Role</th><th style={{textAlign:'left',borderBottom:'1px solid #eee'}}>Squad</th><th style={{textAlign:'left',borderBottom:'1px solid #eee'}}>Actions</th></tr>
+              <tr><th style={{textAlign:'left',borderBottom:'1px solid #eee'}}>ID</th><th style={{textAlign:'left',borderBottom:'1px solid #eee'}}>Username</th><th style={{textAlign:'left',borderBottom:'1px solid #eee'}}>Role</th><th style={{textAlign:'left',borderBottom:'1px solid #eee'}}>Équipe</th><th style={{textAlign:'left',borderBottom:'1px solid #eee'}}>Actions</th></tr>
             </thead>
             <tbody>
               {users.map(u=> (

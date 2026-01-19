@@ -109,8 +109,8 @@ const getSalesPerUser = async () => {
       u.username,
       u.squad,
       COUNT(v.id_vente) as nombre_ventes,
-      SUM(v.quantite) as quantite_totale,
-      AVG(v.quantite) as quantite_moyenne
+      COALESCE(SUM(v.quantite), 0) as quantite_totale,
+      COALESCE(AVG(v.quantite), 0) as quantite_moyenne
     FROM users u
     LEFT JOIN vente v ON u.id = v.id_user
     WHERE u.role = 'user'
@@ -160,17 +160,17 @@ const getMessageStats = async () => {
 };
 
 /**
- * Récupère les statistiques par squad
+ * Récupère les statistiques par équipe
  */
 const getSquadStats = async () => {
   const sql = `
     SELECT 
       u.squad,
-      COUNT(u.id) as nombre_utilisateurs,
+      COUNT(DISTINCT u.id) as nombre_utilisateurs,
       SUM(CASE WHEN u.role = 'manager' THEN 1 ELSE 0 END) as managers,
       SUM(CASE WHEN u.role = 'user' THEN 1 ELSE 0 END) as utilisateurs,
-      SUM(v.quantite) as ventes_totales,
-      COUNT(DISTINCT v.id_vente) as nombre_ventes
+      COALESCE(SUM(v.quantite), 0) as quantite_totale,
+      COUNT(v.id_vente) as nombre_ventes
     FROM users u
     LEFT JOIN vente v ON u.id = v.id_user
     WHERE u.squad IS NOT NULL
@@ -224,4 +224,66 @@ module.exports = {
   getMessageStats,
   getSquadStats,
   getDashboardData
+};
+
+/**
+ * Récupère toutes les ventes avec détails utilisateur
+ */
+const getAllVentes = async () => {
+  const sql = `
+    SELECT 
+      v.id_vente,
+      v.id_user,
+      u.username,
+      u.squad,
+      v.id_produit,
+      v.quantite,
+      v.adresse,
+      v.date_vente
+    FROM vente v
+    LEFT JOIN users u ON v.id_user = u.id
+    ORDER BY v.date_vente DESC
+  `;
+  const [rows] = await db.execute(sql);
+  return rows;
+};
+
+/**
+ * Récupère tous les messages avec détails expéditeur et destinataire
+ */
+const getAllMessages = async () => {
+  const sql = `
+    SELECT 
+      m.idMessage,
+      m.titre,
+      m.contenu,
+      m.dateEnvoi,
+      m.lu,
+      m.idExpediteur,
+      exp.username as expediteur_username,
+      m.idDestinataire,
+      dest.username as destinataire_username
+    FROM MESSAGE m
+    LEFT JOIN users exp ON m.idExpediteur = exp.id
+    LEFT JOIN users dest ON m.idDestinataire = dest.id
+    ORDER BY m.dateEnvoi DESC
+  `;
+  const [rows] = await db.execute(sql);
+  return rows;
+};
+
+module.exports = {
+  getAllUsers,
+  getUserById,
+  createUser,
+  updateUser,
+  deleteUser,
+  getSalesStats,
+  getSalesPerUser,
+  getProductStats,
+  getMessageStats,
+  getSquadStats,
+  getDashboardData,
+  getAllVentes,
+  getAllMessages
 };

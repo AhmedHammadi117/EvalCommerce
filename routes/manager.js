@@ -12,14 +12,14 @@ router.get('/', verifyToken, requireRole('manager'), (req, res) => {
   });
 });
 
-// GET /manager/stats : ventes de la squad du manager connecté
+// GET /manager/stats : ventes de l'équipe du manager connecté
 router.get('/stats', verifyToken, requireRole('manager'), async (req, res) => {
   try {
     const squad = req.user.squad;
     if (!squad) {
-      return res.status(400).json({ ok: false, message: "Aucune squad associée à ce manager." });
+      return res.status(400).json({ ok: false, message: "Aucune équipe associée à ce manager." });
     }
-    // Récupérer tous les users de la squad
+    // Récupérer tous les users de l'équipe
     const db = require('../config/db');
     const [users] = await db.query(
       'SELECT id, username FROM users WHERE squad = ? AND role = ? ORDER BY username',
